@@ -60,16 +60,16 @@ int main(){
     //postprocessing sampler
     VkSampler postprocess_sampler = SamplerInfo().create();
 
-   
-
     //create pipeline contexts and reserve descriptor sets for each used one
     DirectoryPipelinesContext pipelines_context{"shaders"};
     PipelineContext& PBR_context(pipelines_context.getContext("PBR"));
     PBR_context.reserveDescriptorSets(1, 1);
     PipelineContext& postprocess_context(pipelines_context.getContext("postprocess"));
     postprocess_context.reserveDescriptorSets(1);
+
     //create descriptor pool
     pipelines_context.createDescriptorPool();
+    
     //reserve given descriptor set counts
     DescriptorSet set_textures, set_uniform_buffer, set_postprocess;
     PBR_context.allocateDescriptorSets(set_textures, set_uniform_buffer); //PBR context has two sets
