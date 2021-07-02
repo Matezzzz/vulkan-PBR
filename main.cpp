@@ -8,7 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "vulkan_include_all.h"
+#include "just-a-vulkan-library/vulkan_include_all.h"
 
 using std::vector;
 using std::string;

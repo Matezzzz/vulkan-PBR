@@ -3,30 +3,56 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "Compile shaders",
-            "command": "python",
+            "label": "CompileLibrary",
+            "command": "mingw32-make",
             "args": [
-                "${workspaceFolder}\\build_shaders.py"
-            ]
+                "all"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}\\just-a-vulkan-library\\.obj"
+            }
         },
         {
             "type": "shell",
-            "label": "Compile all",
-            /*"dependsOn":[ 
-                "Compile shaders"
-            ],*/
-            "command": "mingw32-make all",
+            "label": "CompileShaders",
+            "dependsOn":[ 
+                "CompileLibrary"
+            ],
+            "command": "python",
+            "args": [
+                "build_shaders.py"
+            ],
             "options": {
-                "cwd": "${workspaceFolder}/.obj"
+                "cwd": "${workspaceFolder}\\shaders_fluid"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "CompileProject",
+            "dependsOn":[ 
+                "CompileShaders"
+            ],
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "main.cpp",
+                "-L${workspaceFolder}\\just-a-vulkan-library",
+                "-LC:/Program Files/MSYS2/mingw64/x86_64-w64-mingw32/lib",
+                "-lJAVL", "-lglfw3dll",
+                "-o", "fluid_sim.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
             }
         },
         {
             "type": "shell",
             "label": "Build and run",
             "dependsOn": [
-                "Compile all"
+                "CompileProject"
             ],
-            "command": "${workspaceFolder}\\vulkan.exe",
+            "command": "${workspaceFolder}\\fluid_sim.exe",
             "group": {
                 "kind": "build",
                 "isDefault": true
