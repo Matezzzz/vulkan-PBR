@@ -107,7 +107,7 @@ int main(){
      //load copper plate textures
     ImageSet copper_plate_images{
         local_object_creator,
-        ImageSetOptions("textures/Metal_Plate_044_SD/Metal_Plate_044").addDiffuse().addAO().addHeightMap().addNormalMap().addRoughness().addMetallic()
+        ImageSetOptions("textures/Metal_Plate_044_SD/Metal_Plate_044", ImageState{IMAGE_SAMPLER}).addDiffuse().addAO().addHeightMap().addNormalMap().addRoughness().addMetallic()
     };
     //sampler for textures
     VkSampler texture_sampler = SamplerInfo().setFilters(VK_FILTER_LINEAR, VK_FILTER_LINEAR).create();
@@ -180,8 +180,8 @@ int main(){
         draw_command_buffer.startRecordPrimary();
         //transition render and depth images to rendering layout and access
         draw_command_buffer.cmdBarrier(VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,\
-            {color_image.createMemoryBarrier(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT),
-             depth_image.createMemoryBarrier(VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT)});
+            {color_image.createMemoryBarrier(ImageState{IMAGE_NEWLY_CREATED}, ImageState{IMAGE_COLOR_ATTACHMENT}),
+             depth_image.createMemoryBarrier(ImageState{IMAGE_NEWLY_CREATED}, ImageState{IMAGE_DEPTH_ATTACHMENT})});
         
         //begin render pass
         draw_command_buffer.cmdBeginRenderPass(render_pass_settings, render_pass, render_framebuffer);
@@ -207,8 +207,8 @@ int main(){
 
         //transition render color image to be sampled, and swapchain image to be rendered into
         draw_command_buffer.cmdBarrier(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-            {color_image    .createMemoryBarrier(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_SHADER_READ_BIT),
-             swapchain_image.createMemoryBarrier(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT)});
+            {color_image    .createMemoryBarrier(ImageState{IMAGE_COLOR_ATTACHMENT}, ImageState{IMAGE_SAMPLER}),
+             swapchain_image.createMemoryBarrier(ImageState{IMAGE_NEWLY_CREATED}, ImageState{IMAGE_COLOR_ATTACHMENT})});
         
         //begin postprocess render pass
         draw_command_buffer.cmdBeginRenderPass(postprocess_render_pass_settings, postprocess_render_pass, swapchain_image.getFramebuffer());
@@ -223,17 +223,13 @@ int main(){
         draw_command_buffer.cmdEndRenderPass();
 
         //end command buffer recording
-        draw_command_buffer.endRecordPrimary();
+        draw_command_buffer.endRecord();
         
         //submit command buffer to the queue, wait for it to finish
         queue.submit(draw_command_buffer, frame_synchronization);
         //if it didn't finish for a long time, print error
-        if (!frame_synchronization.waitFor(A_SHORT_WHILE)){
-            PRINT_ERROR("Waiting for queue failed")
-        }
+        frame_synchronization.waitFor(A_SHORT_WHILE);
 
-        //reset end fence and present image
-        frame_synchronization.getEndFence().reset();
         swapchain.presentImage(swapchain_image, present_queue);
 
         //reset command buffer and record it once again
