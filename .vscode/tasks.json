@@ -23,7 +23,7 @@
                 "build_shaders.py"
             ],
             "options": {
-                "cwd": "${workspaceFolder}\\shaders_fluid"
+                "cwd": "${workspaceFolder}\\shaders"
             }
         },
         {
@@ -40,7 +40,7 @@
                 "-L${workspaceFolder}\\just-a-vulkan-library",
                 "-LC:/Program Files/MSYS2/mingw64/x86_64-w64-mingw32/lib",
                 "-lJAVL", "-lglfw3dll",
-                "-o", "fluid_sim.exe"
+                "-o", "pbr_render.exe"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -52,7 +52,7 @@
             "dependsOn": [
                 "CompileProject"
             ],
-            "command": "${workspaceFolder}\\fluid_sim.exe",
+            "command": "${workspaceFolder}\\pbr_render.exe",
             "group": {
                 "kind": "build",
                 "isDefault": true
